@@ -1,60 +1,74 @@
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { loginCustomer } from '../services/authService'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 
-const router = useRouter()
+import { loginCustomer } from "../services/authService";
 
-const phone = ref('')
-const spk = ref('')
-const loading = ref(false)
-const error = ref('')
+const router = useRouter();
+
+const phone = ref("");
+const spk = ref("");
+
+const loading = ref(false);
+const error = ref("");
 
 const submitLogin = async () => {
     try {
-        loading.value = true
-        error.value = ''
+        loading.value = true;
+        error.value = "";
 
         const response = await loginCustomer({
             phone: phone.value,
             spk: spk.value,
-        })
+        });
 
-        localStorage.setItem(
-            'customer_id',
-            response.data.data.customer_id
-        )
+        localStorage.setItem("customer_id", response.data.data.customer_id);
 
-        router.push('/orders')
-
+        router.push("/orders");
     } catch (err) {
-        error.value = err.response?.data?.message || 'Login gagal'
+        error.value = err.response?.data?.message || "Login gagal";
     } finally {
-        loading.value = false
+        loading.value = false;
     }
-}
+};
 </script>
 
 <template>
-    <div>
-        <h1>Tracking Order</h1>
+    <div class="min-h-screen bg-slate-100 flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-sm p-8">
+            <div class="text-center mb-6">
+                <h1 class="text-3xl font-bold mb-2">Tracking Order</h1>
 
-        <input
-            v-model="phone"
-            placeholder="Nomor WhatsApp"
-        />
+                <p class="text-slate-500">Lacak pesanan Anda</p>
+            </div>
 
-        <input
-            v-model="spk"
-            placeholder="Nomor SPK"
-        />
+            <div class="space-y-4">
+                <input
+                    v-model="phone"
+                    type="text"
+                    placeholder="Nomor WhatsApp"
+                    class="w-full border border-slate-300 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-slate-300"
+                />
 
-        <button @click="submitLogin">
-            {{ loading ? 'Loading...' : 'Masuk' }}
-        </button>
+                <input
+                    v-model="spk"
+                    type="text"
+                    placeholder="Nomor SPK"
+                    class="w-full border border-slate-300 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-slate-300"
+                />
 
-        <p v-if="error">
-            {{ error }}
-        </p>
+                <button
+                    @click="submitLogin"
+                    :disabled="loading"
+                    class="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-2xl py-4 font-semibold transition"
+                >
+                    {{ loading ? "Loading..." : "Masuk" }}
+                </button>
+
+                <p v-if="error" class="text-red-500 text-sm text-center">
+                    {{ error }}
+                </p>
+            </div>
+        </div>
     </div>
 </template>

@@ -6,3 +6,4 @@ use App\Http\Controllers\Api\CustomerOrderController;
 
 Route::post('/customer/login', [CustomerAuthController::class, 'login']);
 Route::get('/customer/orders/{customerId}', [CustomerOrderController::class, 'index']);
+Route::get('/customer/order/{id}', [CustomerOrderController::class, 'show']);

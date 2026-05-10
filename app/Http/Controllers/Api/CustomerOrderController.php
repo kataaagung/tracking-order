@@ -28,7 +28,49 @@ class CustomerOrderController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $orders
+            'data' => $orders->map(function ($order) {
+
+                $order->capture = $order->capture
+                ? 'https://erp.smartone.id/' . ltrim($order->capture, '/')
+                : null;
+
+                return $order;
+
+            })
+        ]);
+    }
+
+    public function show($id)
+    {
+        $order = DB::table('order')
+            ->join('customer', 'customer.id', '=', 'order.customer_id')
+            ->where('order.id', $id)
+            ->select(
+                'order.id',
+                'order.tgl_app_cs',
+                'order.spk',
+                'order.nama_produk',
+                'order.status',
+                'order.qty',
+                'order.produk',
+                'order.capture',
+                'customer.nama as customer_nama'
+            )
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false
+            ], 404);
+        }
+
+        $order->capture = $order->capture
+            ? 'https://erp.smartone.id/' . ltrim($order->capture, '/')
+            : null;
+
+        return response()->json([
+            'success' => true,
+            'data' => $order
         ]);
     }
 }
