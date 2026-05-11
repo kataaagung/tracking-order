@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import { getCustomerOrders } from "../services/orderService";
 import { useRouter } from "vue-router";
+import AppNavbar from "../components/AppNavbar.vue";
 
 const orders = ref([]);
 const loading = ref(true);
@@ -10,9 +11,7 @@ const router = useRouter();
 const loadOrders = async () => {
     try {
         const customerId = localStorage.getItem("customer_id");
-
         const response = await getCustomerOrders(customerId);
-
         orders.value = response.data.data;
     } catch (error) {
         console.error(error);
@@ -21,28 +20,41 @@ const loadOrders = async () => {
     }
 };
 
-const statusClass = (status) => {
-    switch (status) {
-        case "PRINT DONE":
-            return "bg-green-100 text-green-700";
-
-        case "QC":
-            return "bg-purple-100 text-purple-700";
-
-        case "PACKING":
-            return "bg-amber-100 text-amber-700";
-
-        default:
-            return "bg-blue-100 text-blue-700";
-    }
-};
-
 const formatDate = (date) => {
+    if (!date) return "-";
     return new Date(date).toLocaleDateString("id-ID", {
         day: "numeric",
         month: "long",
         year: "numeric",
     });
+};
+
+const statusLabel = (order) => {
+    if (order.status === "BELUM" && !order.tgl_app_cs) {
+        return "Menunggu Pembayaran";
+    }
+    if (order.status === "BELUM" && order.tgl_app_cs) {
+        return "Menunggu Produksi";
+    }
+    if (order.statusm === "IN PROGRESS") {
+        return "Sedang Proses Design";
+    }
+    switch (order.status) {
+        case "PRINT":
+            return "Sedang Printing";
+        case "PRINT DONE":
+            return "Printing Selesai";
+        case "PRESS":
+            return "Sedang Press";
+        case "PRESS DONE":
+            return "Press Selesai";
+        case "CUTTING":
+            return "Sedang Cutting";
+        case "CUTTING DONE":
+            return "Pesanan Selesai";
+        default:
+            return order.status;
+    }
 };
 
 onMounted(() => {
@@ -51,77 +63,191 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-slate-100 p-4">
-        <div class="max-w-xl mx-auto">
-            <div class="mb-6">
-                <h1 class="text-3xl font-bold">Pesanan Anda</h1>
+    <div>
+        <AppNavbar title="SMARTONE" />
 
-                <p class="text-slate-500 mt-1">
-                    Tracking progress order customer
-                </p>
-            </div>
-
-            <div v-if="loading" class="text-center py-10 text-slate-500">
-                Loading...
-            </div>
-
-            <div v-else class="space-y-4">
+        <div
+            class="product-tile-parchment"
+            style="min-height: calc(100vh - 96px); padding-top: 40px"
+        >
+            <div class="content-lock">
                 <div
-                    v-for="order in orders"
-                    :key="order.id"
-                    @click="router.push(`/tracking/${order.id}`)"
-                    class="bg-white rounded-2xl shadow-sm overflow-hidden transition hover:-translate-y-1 hover:shadow-md"
+                    style="
+                        text-align: center;
+                        margin-bottom: var(--spacing-xxl);
+                    "
                 >
-                    <img
-                        v-if="order.capture"
-                        :src="order.capture"
-                        class="w-full h-48 object-cover"
-                    />
+                    <h1 class="display-lg">Your Orders.</h1>
+                    <p class="lead" style="color: var(--colors-ink-muted-80)">
+                        Track your recent purchases and their journey.
+                    </p>
+                </div>
 
-                    <div class="p-5">
-                        <div class="flex items-start justify-between gap-3">
-                            <div>
-                                <h2 class="font-bold text-lg">
-                                    {{ order.nama_produk }}
-                                </h2>
+                <div
+                    v-if="loading"
+                    style="
+                        text-align: center;
+                        padding: var(--spacing-xxl);
+                        color: var(--colors-ink-muted-80);
+                    "
+                >
+                    <span class="body-strong">Loading your orders...</span>
+                </div>
 
-                                <p class="text-slate-500 text-sm mt-1">
-                                    SPK {{ order.spk }}
-                                </p>
+                <div v-else class="orders-grid">
+                    <div
+                        v-for="order in orders"
+                        :key="order.id"
+                        @click="router.push(`/tracking/${order.id}`)"
+                        class="store-utility-card clickable-card"
+                    >
+                        <div class="card-image-wrapper">
+                            <img
+                                v-if="order.capture"
+                                :src="order.capture"
+                                class="card-image"
+                                alt="Product Render"
+                            />
+                            <div v-else class="card-image-placeholder"></div>
+                        </div>
+
+                        <div style="margin-top: var(--spacing-md)">
+                            <div
+                                style="
+                                    display: flex;
+                                    justify-content: space-between;
+                                    align-items: flex-start;
+                                    gap: 12px;
+                                "
+                            >
+                                <div>
+                                    <h2 class="body-strong">
+                                        {{ order.nama_produk }}
+                                    </h2>
+                                    <p
+                                        class="caption mt-xs"
+                                        style="
+                                            color: var(--colors-ink-muted-80);
+                                        "
+                                    >
+                                        SPK {{ order.spk }}
+                                    </p>
+                                </div>
+                                <div style="text-align: right">
+                                    <span
+                                        class="status-badge"
+                                        :class="
+                                            order.status === 'CUTTING DONE'
+                                                ? 'status-complete'
+                                                : 'status-active'
+                                        "
+                                    >
+                                        {{ statusLabel(order) }}
+                                    </span>
+                                </div>
                             </div>
 
                             <div
-                                :class="[
-                                    statusClass(order.status),
-                                    'text-xs font-medium px-3 py-1 rounded-full whitespace-nowrap',
-                                ]"
+                                style="
+                                    margin-top: var(--spacing-lg);
+                                    padding-top: var(--spacing-sm);
+                                    border-top: 1px solid var(--colors-hairline);
+                                    display: flex;
+                                    justify-content: space-between;
+                                "
                             >
-                                {{ order.status }}
-                            </div>
-                        </div>
-
-                        <div
-                            class="mt-4 flex items-center justify-between text-sm"
-                        >
-                            <div>
-                                <p class="text-slate-400">Qty</p>
-
-                                <p class="font-semibold">
-                                    {{ order.qty }}
-                                </p>
-                            </div>
-
-                            <div class="text-right">
-                                <p class="text-slate-400">Tanggal</p>
-
-                                <p class="font-semibold">
-                                    {{ formatDate(order.tgl_app_cs) }}
-                                </p>
+                                <div>
+                                    <p
+                                        class="caption"
+                                        style="
+                                            color: var(--colors-ink-muted-80);
+                                        "
+                                    >
+                                        Qty
+                                    </p>
+                                    <p class="body-strong">{{ order.qty }}</p>
+                                </div>
+                                <div style="text-align: right">
+                                    <p
+                                        class="caption"
+                                        style="
+                                            color: var(--colors-ink-muted-80);
+                                        "
+                                    >
+                                        Date
+                                    </p>
+                                    <p class="body-strong">
+                                        {{ formatDate(order.tgl_app_cs) }}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div
+                    v-if="!loading && orders.length === 0"
+                    style="
+                        text-align: center;
+                        padding: var(--spacing-xxl);
+                        color: var(--colors-ink-muted-80);
+                    "
+                >
+                    <span class="body-strong">No orders found.</span>
                 </div>
             </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+.orders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.clickable-card {
+    cursor: pointer;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+.clickable-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-product);
+}
+
+.card-image-wrapper {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--rounded-sm);
+    overflow: hidden;
+    background-color: var(--colors-canvas-parchment);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-image-placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: #e5e5ea;
+}
+
+.status-badge {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: -0.12px;
+    color: var(--colors-primary);
+}
+.status-complete {
+    color: var(--colors-ink);
+}
+</style>

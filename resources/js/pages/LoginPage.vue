@@ -34,41 +34,66 @@ const submitLogin = async () => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-slate-100 flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-md rounded-3xl shadow-sm p-8">
-            <div class="text-center mb-6">
-                <h1 class="text-3xl font-bold mb-2">Tracking Order</h1>
-
-                <p class="text-slate-500">Lacak pesanan Anda</p>
+    <div class="product-tile-parchment" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background-color: var(--colors-canvas); width: 100%; max-width: 440px; border-radius: var(--rounded-lg); padding: var(--spacing-xxl); border: 1px solid var(--colors-hairline);">
+            <div style="text-align: center; margin-bottom: var(--spacing-xl);">
+                <img
+                    src="http://127.0.0.1:8000/logo.png"
+                    alt="Logo"
+                    style="width: 60px; margin: 0 auto var(--spacing-sm); display: block;"
+                />
+                <h1 class="display-md">Tracking Order</h1>
+                <p class="body-muted mt-xs">Sign in to track your deliveries.</p>
             </div>
 
-            <div class="space-y-4">
+            <div style="display: flex; flex-direction: column; gap: var(--spacing-md);">
                 <input
                     v-model="phone"
                     type="text"
-                    placeholder="Nomor WhatsApp"
-                    class="w-full border border-slate-300 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-slate-300"
+                    placeholder="WhatsApp Number"
+                    class="apple-input"
                 />
 
                 <input
                     v-model="spk"
                     type="text"
-                    placeholder="Nomor SPK"
-                    class="w-full border border-slate-300 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-slate-300"
+                    placeholder="SPK Number"
+                    class="apple-input"
                 />
 
                 <button
                     @click="submitLogin"
                     :disabled="loading"
-                    class="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-2xl py-4 font-semibold transition"
+                    class="button-primary mt-sm"
+                    style="width: 100%;"
                 >
-                    {{ loading ? "Loading..." : "Masuk" }}
+                    {{ loading ? "Loading..." : "Sign In" }}
                 </button>
 
-                <p v-if="error" class="text-red-500 text-sm text-center">
+                <p v-if="error" style="color: var(--colors-primary); font-size: 14px; text-align: center; margin-top: 8px;">
                     {{ error }}
                 </p>
             </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+.apple-input {
+    background-color: var(--colors-canvas);
+    color: var(--colors-ink);
+    font-size: 17px;
+    font-family: var(--font-body);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: var(--rounded-sm);
+    padding: 14px 16px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.apple-input:focus {
+    border-color: var(--colors-primary-focus);
+    box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.2);
+}
+</style>

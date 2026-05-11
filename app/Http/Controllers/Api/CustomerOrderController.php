@@ -12,6 +12,12 @@ class CustomerOrderController extends Controller
         $orders = DB::table('order')
             ->join('customer', 'customer.id', '=', 'order.customer_id')
             ->where('order.customer_id', $customerId)
+
+            ->where('order.status', '!=', 'CANCEL')
+
+            ->whereNotNull('order.spk')
+            ->where('order.spk', '!=', '')
+
             ->orderByDesc('order.id')
             ->select(
                 'order.id',
@@ -19,6 +25,7 @@ class CustomerOrderController extends Controller
                 'order.spk',
                 'order.nama_produk',
                 'order.status',
+                'order.statusm',
                 'order.qty',
                 'order.produk',
                 'order.capture',
@@ -31,11 +38,10 @@ class CustomerOrderController extends Controller
             'data' => $orders->map(function ($order) {
 
                 $order->capture = $order->capture
-                ? 'https://erp.smartone.id/' . ltrim($order->capture, '/')
-                : null;
+                    ? 'https://erp.smartone.id/' . ltrim($order->capture, '/')
+                    : null;
 
                 return $order;
-
             })
         ]);
     }
@@ -51,6 +57,7 @@ class CustomerOrderController extends Controller
                 'order.spk',
                 'order.nama_produk',
                 'order.status',
+                'order.statusm',
                 'order.qty',
                 'order.produk',
                 'order.capture',

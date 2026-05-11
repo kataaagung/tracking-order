@@ -15,9 +15,26 @@ class CustomerAuthController extends Controller
             'spk' => 'required',
         ]);
 
+        $phone = $this->normalizePhone($request->phone);
+
+        $customers = DB::table('customer')->get();
+
+        $customer = $customers->first(function ($c) use ($phone) {
+
+            return $this->normalizePhone($c->telp) == $phone;
+        });
+
+        if (!$customer) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Customer tidak ditemukan'
+            ], 401);
+        }
+
         $order = DB::table('order')
             ->join('customer', 'customer.id', '=', 'order.customer_id')
-            ->where('customer.telp', $request->phone)
+            ->where('order.customer_id', $customer->id)
             ->where('order.spk', $request->spk)
             ->select(
                 'order.id',
@@ -34,6 +51,7 @@ class CustomerAuthController extends Controller
             ->first();
 
         if (!$order) {
+
             return response()->json([
                 'success' => false,
                 'message' => 'Data tidak ditemukan'
@@ -54,5 +72,20 @@ class CustomerAuthController extends Controller
                 'capture' => $order->capture,
             ]
         ]);
+    }
+
+    private function normalizePhone($phone)
+    {
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+        if (substr($phone, 0, 1) == '0') {
+            $phone = '62' . substr($phone, 1);
+        }
+
+        if (substr($phone, 0, 2) != '62') {
+            $phone = '62' . $phone;
+        }
+
+        return $phone;
     }
 }
