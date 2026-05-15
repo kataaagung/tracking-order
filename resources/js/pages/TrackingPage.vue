@@ -42,14 +42,18 @@ const statusLabel = (order) => {
         case "PRINT":
             return "Sedang Printing";
         case "PRINT DONE":
-            return "Printing Selesai";
+            return "Selesai Printing";
         case "PRESS":
             return "Sedang Press";
         case "PRESS DONE":
-            return "Press Selesai";
+            return "Selesai Press";
         case "CUTTING":
             return "Sedang Cutting";
         case "CUTTING DONE":
+            return "Pesanan Selesai";
+        case "DTF DONE":
+            return "Pesanan Selesai";
+        case "DISERAHKAN":
             return "Pesanan Selesai";
         default:
             return order.status;
@@ -86,16 +90,6 @@ const trackingSteps = (order) => {
                 currentStep > 3
                     ? "done"
                     : currentStep === 3
-                      ? "current"
-                      : "pending",
-        },
-
-        {
-            label: "Quality Control",
-            state:
-                currentStep > 4
-                    ? "done"
-                    : currentStep === 4
                       ? "current"
                       : "pending",
         },

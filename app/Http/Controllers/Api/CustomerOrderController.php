@@ -17,6 +17,7 @@ class CustomerOrderController extends Controller
 
             ->whereNotNull('order.spk')
             ->where('order.spk', '!=', '')
+            ->where('status_spk', 'printed')
 
             ->orderByDesc('order.id')
             ->select(
